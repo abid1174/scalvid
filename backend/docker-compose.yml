@@ -1,0 +1,9 @@
+services:
+  scalvid-backend:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - GO_ENV=production
+    restart: unless-stopped
+    container_name: scalvid-backend
