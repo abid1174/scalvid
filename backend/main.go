@@ -17,6 +17,7 @@ type Product struct {
 
 var products []Product
 
+// ================ Handlers ================
 func helloHandler(w http.ResponseWriter, r *http.Request) {
 	hanldeCORS(w)
 	handlePreflight(w, r)
@@ -33,7 +34,7 @@ func getProductsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(products)
+	sendResponse(w, http.StatusOK, products)
 }
 
 func createProductHandler(w http.ResponseWriter, r *http.Request) {
@@ -54,16 +55,16 @@ func createProductHandler(w http.ResponseWriter, r *http.Request) {
 	product.ID = len(products) + 1
 	log.Println("Product created: ", product)
 	products = append(products, product)
-	json.NewEncoder(w).Encode(product)
-	w.WriteHeader(http.StatusCreated)
+	sendResponse(w, http.StatusCreated, product)
 }
+
+// ================ Helper Functions ================
 
 func hanldeCORS(w http.ResponseWriter) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 	w.Header().Set("Content-Type", "application/json")
-
 }
 
 func handlePreflight(w http.ResponseWriter, r *http.Request) {
@@ -72,6 +73,13 @@ func handlePreflight(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func sendResponse(w http.ResponseWriter, statusCode int, data interface{}) {
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(data)
+}
+
+// ================ Main Function ================
 
 func main() {
 	mux := http.NewServeMux()
