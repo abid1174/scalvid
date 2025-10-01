@@ -4,17 +4,24 @@ import (
 	"log"
 	"net/http"
 	controller "scalvid/controller/product"
+	"scalvid/middleware"
 )
 
 func main() {
+	// Initialize routes mux
 	mux := http.NewServeMux()
 
-	mux.Handle("GET /", corsMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	// Initialize middleware manager
+	middlewareManager := middleware.NewManager()
+	middlewares := middlewareManager.With(middleware.Cors, middleware.Logger, middleware.Test)
+
+	// Register routes
+	mux.Handle("GET /", middlewares(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello, World!"))
 	})))
 
-	mux.Handle("GET /products", corsMiddleware(http.HandlerFunc(controller.GetProductsHandler)))
-	mux.Handle("POST /create-product", corsMiddleware(http.HandlerFunc(controller.CreateProductHandler)))
+	mux.Handle("GET /products", middlewares(http.HandlerFunc(controller.GetProductsHandler)))
+	mux.Handle("POST /create-product", middlewares(http.HandlerFunc(controller.CreateProductHandler)))
 
 	log.Println("Server is running on port 8000")
 
@@ -23,16 +30,4 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-// ========= Middleware ================
-
-func corsMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		w.Header().Set("Content-Type", "application/json")
-		next.ServeHTTP(w, r)
-	})
 }
