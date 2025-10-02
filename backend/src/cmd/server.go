@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"log"
@@ -7,15 +7,12 @@ import (
 	"scalvid/middleware"
 )
 
-func main() {
-	// Initialize routes mux
+func Serve() {
 	mux := http.NewServeMux()
 
-	// Initialize middleware manager
 	middlewareManager := middleware.NewManager()
 	middlewares := middlewareManager.With(middleware.Cors, middleware.Logger, middleware.Test)
 
-	// Register routes
 	mux.Handle("GET /", middlewares(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello, World!"))
 	})))
