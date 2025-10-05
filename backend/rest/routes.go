@@ -1,9 +1,9 @@
-package cmd
+package rest
 
 import (
 	"net/http"
-	controller "scalvid/controller/product"
-	"scalvid/middleware"
+	controller "scalvid/rest/controller/product"
+	"scalvid/rest/middleware"
 )
 
 func initRoutes(mux *http.ServeMux, middlewareManager *middleware.Manager) {
