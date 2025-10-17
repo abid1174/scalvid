@@ -11,16 +11,19 @@ import (
 var configurations Config
 
 type Config struct {
-	Version  string
-	HttpPort int
-	GoEnv    string
+	Version    string
+	HttpPort   int
+	GoEnv      string
+	DbPort     string
+	DbUser     string
+	DbPassword string
+	DbName     string
 }
 
 func loadConfig() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	// Load .env file if it exists (for local development)
+	// In Docker, environment variables are provided by docker-compose
+	_ = godotenv.Load()
 
 	// Get VERSION from .env file
 	version := os.Getenv("VERSION")
@@ -46,10 +49,19 @@ func loadConfig() {
 		log.Fatal("GO_ENV is not set")
 	}
 
+	dbPort := os.Getenv("DB_PORT")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+
 	configurations = Config{
-		Version:  version,
-		HttpPort: httpPort,
-		GoEnv:    goEnv,
+		Version:    version,
+		HttpPort:   httpPort,
+		GoEnv:      goEnv,
+		DbPort:     dbPort,
+		DbUser:     dbUser,
+		DbPassword: dbPassword,
+		DbName:     dbName,
 	}
 }
 

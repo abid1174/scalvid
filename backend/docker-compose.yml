@@ -1,9 +1,41 @@
 services:
   scalvid-backend:
     build: .
+    env_file:
+      - .env
     ports:
-      - "8000:8000"
+      - "${HTTP_PORT}:8000"
     environment:
-      - GO_ENV=production
+      - GO_ENV=${GO_ENV}
+      - DB_HOST=scalvid-db
+      - DB_PORT=5432
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
     restart: unless-stopped
     container_name: scalvid-backend
+    depends_on:
+      scalvid-db:
+        condition: service_healthy
+
+  scalvid-db:
+    image: postgres:latest
+    container_name: scalvid-db
+    ports:
+      - "${DB_PORT}:5432"
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    restart: unless-stopped
+    volumes:
+      - scalvid_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  scalvid_postgres_data:
