@@ -11,13 +11,14 @@ import (
 var configurations Config
 
 type Config struct {
-	Version    string
-	HttpPort   int
-	GoEnv      string
-	DbPort     string
-	DbUser     string
-	DbPassword string
-	DbName     string
+	Version      string
+	HttpPort     int
+	GoEnv        string
+	DbPort       string
+	DbUser       string
+	DbPassword   string
+	DbName       string
+	JwtSecretKey string
 }
 
 func loadConfig() {
@@ -54,14 +55,20 @@ func loadConfig() {
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbName := os.Getenv("DB_NAME")
 
+	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
+	if jwtSecretKey == "" {
+		log.Fatal("JWT Secret Key is required!")
+	}
+
 	configurations = Config{
-		Version:    version,
-		HttpPort:   httpPort,
-		GoEnv:      goEnv,
-		DbPort:     dbPort,
-		DbUser:     dbUser,
-		DbPassword: dbPassword,
-		DbName:     dbName,
+		Version:      version,
+		HttpPort:     httpPort,
+		GoEnv:        goEnv,
+		DbPort:       dbPort,
+		DbUser:       dbUser,
+		DbPassword:   dbPassword,
+		DbName:       dbName,
+		JwtSecretKey: jwtSecretKey,
 	}
 }
 
