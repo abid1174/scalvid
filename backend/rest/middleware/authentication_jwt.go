@@ -54,6 +54,7 @@ func AuthenticationJWT(next http.Handler) http.Handler {
 		hash := h.Sum(nil)
 		newSignature := base64Encode(hash)
 
+		// check token signature with newly created signature 
 		if tokenSignature != newSignature {
 			http.Error(w, "Unauthorised", http.StatusUnauthorized)
 			return
