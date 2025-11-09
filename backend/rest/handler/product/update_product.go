@@ -1,4 +1,4 @@
-package handler
+package product
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-func UpdateProductHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) UpdateProductHandler(w http.ResponseWriter, r *http.Request) {
 	// Get ID from URL path parameter
 	idStr := r.PathValue("id")
 	if idStr == "" {

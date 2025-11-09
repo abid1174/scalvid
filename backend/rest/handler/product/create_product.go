@@ -1,4 +1,4 @@
-package handler
+package product
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 	"scalvid/utils"
 )
 
-func CreateProductHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) CreateProductHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("CreateProductHandler")
 
 	var product repo.Product

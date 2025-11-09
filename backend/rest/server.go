@@ -4,11 +4,22 @@ import (
 	"log"
 	"net/http"
 	"scalvid/config"
+	"scalvid/rest/handler/product"
 	"scalvid/rest/middleware"
 	"strconv"
 )
 
-func StartServer(config config.Config) {
+type Server struct {
+	productHandler *product.Handler
+}
+
+func NewServer(productHandler *product.Handler) *Server {
+	return &Server{
+		productHandler: productHandler,
+	}
+}
+
+func (s *Server) StartServer(config config.Config) {
 	middlewareManager := middleware.NewManager()
 	middlewareManager.Use(
 		middleware.Preflight,
@@ -19,7 +30,8 @@ func StartServer(config config.Config) {
 	mux := http.NewServeMux()
 	wrappedMux := middlewareManager.WrapGlobals(mux)
 
-	initRoutes(mux, middlewareManager)
+	// Register Routes
+	s.productHandler.RegisterRoute(mux, middlewareManager)
 
 	log.Println("Server is running on port ", config.HttpPort)
 

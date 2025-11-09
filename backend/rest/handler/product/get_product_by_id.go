@@ -1,4 +1,4 @@
-package handler
+package product
 
 import (
 	"net/http"
@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func GetProductHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetProductHandler(w http.ResponseWriter, r *http.Request) {
 	// Get ID from URL path parameter
 	idStr := r.PathValue("id")
 	if idStr == "" {
