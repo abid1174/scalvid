@@ -10,16 +10,18 @@ import (
 )
 
 type Server struct {
+	config         *config.Config
 	productHandler *product.Handler
 }
 
-func NewServer(productHandler *product.Handler) *Server {
+func NewServer(config *config.Config, productHandler *product.Handler) *Server {
 	return &Server{
+		config:         config,
 		productHandler: productHandler,
 	}
 }
 
-func (s *Server) StartServer(config config.Config) {
+func (s *Server) StartServer() {
 	middlewareManager := middleware.NewManager()
 	middlewareManager.Use(
 		middleware.Preflight,
@@ -33,9 +35,9 @@ func (s *Server) StartServer(config config.Config) {
 	// Register Routes
 	s.productHandler.RegisterRoute(mux, middlewareManager)
 
-	log.Println("Server is running on port ", config.HttpPort)
+	log.Println("Server is running on port ", s.config.HttpPort)
 
-	addr := ":" + strconv.Itoa(config.HttpPort)
+	addr := ":" + strconv.Itoa(s.config.HttpPort)
 	err := http.ListenAndServe(addr, wrappedMux)
 
 	if err != nil {

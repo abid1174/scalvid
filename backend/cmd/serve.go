@@ -4,13 +4,16 @@ import (
 	"scalvid/config"
 	"scalvid/rest"
 	"scalvid/rest/handler/product"
+	"scalvid/rest/middleware"
 )
 
 func Serve() {
 	config := config.GetConfig()
 
-	productHandler := product.NewHandler()
+	middlewares := middleware.NewMiddlewares(config)
 
-	server := rest.NewServer(productHandler)
-	server.StartServer(config)
+	productHandler := product.NewHandler(middlewares)
+
+	server := rest.NewServer(config, productHandler)
+	server.StartServer()
 }

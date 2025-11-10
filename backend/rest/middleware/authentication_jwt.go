@@ -5,13 +5,11 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"net/http"
-	"scalvid/config"
 	"strings"
 )
 
-func AuthenticationJWT(next http.Handler) http.Handler {
+func (m *Middlewares) AuthenticationJWT(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		conf := config.GetConfig()
 
 		// extract jwt token from request header
 		authHeader := r.Header.Get("Authorization")
@@ -44,7 +42,7 @@ func AuthenticationJWT(next http.Handler) http.Handler {
 
 		// Generate token new signature
 		tokenHeaderAndPayload := tokenHeader + "." + tokenPayload
-		jwtSecret := conf.JwtSecretKey
+		jwtSecret := m.config.JwtSecretKey
 
 		byteArrTokenHeaderAndPayload := []byte(tokenHeaderAndPayload)
 		byteArrJwtSecret := []byte(jwtSecret)
@@ -54,7 +52,7 @@ func AuthenticationJWT(next http.Handler) http.Handler {
 		hash := h.Sum(nil)
 		newSignature := base64Encode(hash)
 
-		// check token signature with newly created signature 
+		// check token signature with newly created signature
 		if tokenSignature != newSignature {
 			http.Error(w, "Unauthorised", http.StatusUnauthorized)
 			return
