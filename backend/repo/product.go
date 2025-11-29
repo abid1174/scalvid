@@ -6,6 +6,14 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+type ProductRepository interface {
+	CreateProduct(product Product) (Product, error)
+	GetProduct(id int) (Product, error)
+	GetProducts() ([]Product, error)
+	UpdateProduct(id int, product Product) (Product, error)
+	DeleteProduct(id int) error
+}
+
 type Product struct {
 	ID          int     `json:"id"`
 	Title       string  `json:"title"`
@@ -13,14 +21,6 @@ type Product struct {
 	Description string  `json:"description"`
 	Category    string  `json:"category"`
 	ImageUrl    string  `json:"imageUrl"`
-}
-
-type ProductRepository interface {
-	CreateProduct(product Product) (Product, error)
-	GetProduct(id int) (Product, error)
-	GetProducts() ([]Product, error)
-	UpdateProduct(id int, product Product) (Product, error)
-	DeleteProduct(id int) error
 }
 
 type productRepository struct {

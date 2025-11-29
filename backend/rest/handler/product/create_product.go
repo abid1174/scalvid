@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"scalvid/infra/db"
 	"scalvid/repo"
 	"scalvid/utils"
 )
@@ -30,10 +29,7 @@ func (h *Handler) CreateProductHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbConnection := db.NewConnection()
-
-	productRepository := repo.NewProductRepository(dbConnection)
-	createdProduct, err := productRepository.CreateProduct(repo.Product{
+	createdProduct, err := h.productRepo.CreateProduct(repo.Product{
 		Title:       product.Title,
 		Price:       product.Price,
 		Description: product.Description,
