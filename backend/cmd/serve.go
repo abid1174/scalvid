@@ -12,7 +12,7 @@ import (
 func Serve() {
 	config := config.GetConfig()
 
-	dbConnection := db.NewConnection()
+	dbConnection := db.NewConnection(config.DB)
 	productRepository := repo.NewProductRepository(dbConnection)
 
 	middlewares := middleware.NewMiddlewares(config)

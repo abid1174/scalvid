@@ -13,8 +13,9 @@ func (h *Handler) CreateProductHandler(w http.ResponseWriter, r *http.Request) {
 
 	var product repo.Product
 
+	log.Println("Request Body", r.Body)
+
 	err := json.NewDecoder(r.Body).Decode(&product)
-	log.Println("Invalid request body", err)
 	if err != nil {
 		utils.SendError(w, http.StatusBadRequest, "Invalid request body")
 		return
@@ -24,6 +25,7 @@ func (h *Handler) CreateProductHandler(w http.ResponseWriter, r *http.Request) {
 		utils.SendError(w, http.StatusBadRequest, "Title is required")
 		return
 	}
+
 	if product.Price <= 0 {
 		utils.SendError(w, http.StatusBadRequest, "Price must be greater than 0")
 		return
@@ -33,7 +35,6 @@ func (h *Handler) CreateProductHandler(w http.ResponseWriter, r *http.Request) {
 		Title:       product.Title,
 		Price:       product.Price,
 		Description: product.Description,
-		Category:    product.Category,
 		ImageUrl:    product.ImageUrl,
 	})
 

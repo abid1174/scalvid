@@ -3,29 +3,29 @@ package db
 import (
 	"fmt"
 	"log"
-	"os"
 	"scalvid/config"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
-func GetConnectionString() string {
-	cfg := config.GetConfig()
+func GetConnectionString(dbConfig *config.DBConfig) string {
+	connectionString := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s",
+		dbConfig.Host, dbConfig.Port, dbConfig.User, dbConfig.Password, dbConfig.Name)
 
-	// Use "scalvid-db" as host when running in Docker, "localhost" otherwise
-	host := os.Getenv("DB_HOST")
-	if host == "" {
-		host = "localhost"
+	if !dbConfig.EnableSSLMode {
+		connectionString += " sslmode=disable"
 	}
 
-	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		host, cfg.DbPort, cfg.DbUser, cfg.DbPassword, cfg.DbName)
+	return connectionString
 }
 
-func NewConnection() *sqlx.DB {
-	log.Println("GetConnectionString", GetConnectionString())
-	db, err := sqlx.Connect("postgres", GetConnectionString())
+func NewConnection(dbConfig *config.DBConfig) *sqlx.DB {
+	connectionString := GetConnectionString(dbConfig)
+	log.Println("Connection String: ", connectionString)
+
+	db, err := sqlx.Connect("postgres", connectionString)
+	log.Println("Database connected")
 	if err != nil {
 		log.Println("Error connecting to database")
 		log.Fatal(err)

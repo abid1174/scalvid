@@ -10,15 +10,21 @@ import (
 
 var configurations *Config
 
+type DBConfig struct {
+	Host          string
+	Port          int
+	Name          string
+	User          string
+	Password      string
+	EnableSSLMode bool
+}
+
 type Config struct {
 	Version      string
 	HttpPort     int
 	GoEnv        string
-	DbPort       string
-	DbUser       string
-	DbPassword   string
-	DbName       string
 	JwtSecretKey string
+	DB           *DBConfig
 }
 
 func loadConfig() {
@@ -50,25 +56,63 @@ func loadConfig() {
 		log.Fatal("GO_ENV is not set")
 	}
 
-	dbPort := os.Getenv("DB_PORT")
-	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASSWORD")
-	dbName := os.Getenv("DB_NAME")
-
 	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
 	if jwtSecretKey == "" {
 		log.Fatal("JWT Secret Key is required!")
+	}
+
+	// DB CONFIG
+	dbHost := os.Getenv("DB_HOST")
+	if dbHost == "" {
+		log.Fatal("DB Host is required!")
+	}
+
+	dbPortStr := os.Getenv("DB_PORT")
+	if dbPortStr == "" {
+		log.Fatal("DB Port is required!")
+	}
+
+	dbPort, err := strconv.Atoi(dbPortStr)
+	if err != nil {
+		log.Fatal("DB Port must be integer!")
+	}
+
+	dbUser := os.Getenv("DB_USER")
+	if dbUser == "" {
+		log.Fatal("DB User is required!")
+	}
+
+	dbPassword := os.Getenv("DB_PASSWORD")
+	if dbPassword == "" {
+		log.Fatal("DB Password is required!")
+	}
+
+	dbName := os.Getenv("DB_NAME")
+	if dbName == "" {
+		log.Fatal("DB Name is required!")
+	}
+
+	enableSSLMode := os.Getenv("ENABLE_SSL_MODE")
+	isSSLModeEnabled, err := strconv.ParseBool(enableSSLMode)
+	if err != nil {
+		log.Fatal("Invalid enableSSLMode format!", err)
+	}
+
+	dbConfig := &DBConfig{
+		Host:          dbHost,
+		Port:          dbPort,
+		Name:          dbName,
+		User:          dbUser,
+		Password:      dbPassword,
+		EnableSSLMode: isSSLModeEnabled,
 	}
 
 	configurations = &Config{
 		Version:      version,
 		HttpPort:     httpPort,
 		GoEnv:        goEnv,
-		DbPort:       dbPort,
-		DbUser:       dbUser,
-		DbPassword:   dbPassword,
-		DbName:       dbName,
 		JwtSecretKey: jwtSecretKey,
+		DB:           dbConfig,
 	}
 }
 

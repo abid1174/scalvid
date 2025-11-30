@@ -2,11 +2,14 @@ package product
 
 import (
 	"net/http"
-	"scalvid/database"
 	"scalvid/utils"
 )
 
 func (h *Handler) GetProductsHandler(w http.ResponseWriter, r *http.Request) {
-	products := database.GetProducts()
+	products, err := h.productRepo.GetProducts()
+	if err != nil {
+		utils.SendError(w, http.StatusInternalServerError, "Failed to get products")
+		return
+	}
 	utils.SendResponse(w, http.StatusOK, products)
 }
