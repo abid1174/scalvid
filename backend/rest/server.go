@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"scalvid/config"
+
 	"scalvid/rest/handler/product"
 	"scalvid/rest/middleware"
 	"strconv"

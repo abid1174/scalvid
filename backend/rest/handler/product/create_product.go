@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"scalvid/repo"
+	"scalvid/domain"
 	"scalvid/utils"
 )
 
 func (h *Handler) CreateProductHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("CreateProductHandler")
 
-	var product repo.Product
+	var product domain.Product
 
 	log.Println("Request Body", r.Body)
 
@@ -31,7 +31,7 @@ func (h *Handler) CreateProductHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	createdProduct, err := h.productRepo.CreateProduct(repo.Product{
+	createdProduct, err := h.service.CreateProduct(domain.Product{
 		Title:       product.Title,
 		Price:       product.Price,
 		Description: product.Description,

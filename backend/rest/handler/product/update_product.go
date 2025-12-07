@@ -3,7 +3,7 @@ package product
 import (
 	"encoding/json"
 	"net/http"
-	"scalvid/repo"
+	"scalvid/domain"
 	"scalvid/utils"
 	"strconv"
 )
@@ -16,14 +16,14 @@ func (h *Handler) UpdateProductHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var product repo.Product
+	var product domain.Product
 	err = json.NewDecoder(r.Body).Decode(&product)
 	if err != nil {
 		utils.SendError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
-	updatedProduct, err := h.productRepo.UpdateProduct(id, product)
+	updatedProduct, err := h.service.UpdateProduct(id, product)
 	if err != nil {
 		utils.SendError(w, http.StatusInternalServerError, "Failed to update product")
 		return

@@ -1,18 +1,18 @@
 package product
 
 import (
-	"scalvid/repo"
+	"scalvid/product"
 	"scalvid/rest/middleware"
 )
 
 type Handler struct {
 	middlewares *middleware.Middlewares
-	productRepo repo.ProductRepository
+	service     product.ProductService
 }
 
-func NewHandler(m *middleware.Middlewares, pr repo.ProductRepository) *Handler {
+func NewHandler(m *middleware.Middlewares, service product.ProductService) *Handler {
 	return &Handler{
 		middlewares: m,
-		productRepo: pr,
+		service:     service,
 	}
 }

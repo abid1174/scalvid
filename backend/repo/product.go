@@ -3,34 +3,25 @@ package repo
 import (
 	"database/sql"
 
+	"scalvid/domain"
+	"scalvid/product"
+
 	"github.com/jmoiron/sqlx"
 )
 
-type ProductRepository interface {
-	CreateProduct(product Product) (*Product, error)
-	GetProduct(id int) (*Product, error)
-	GetProducts() ([]*Product, error)
-	UpdateProduct(id int, product Product) (*Product, error)
-	DeleteProduct(id int) error
-}
-
-type Product struct {
-	ID          int     `json:"id" db:"id"`
-	Title       string  `json:"title" db:"title"`
-	Price       float64 `json:"price" db:"price"`
-	Description string  `json:"description" db:"description"`
-	ImageUrl    string  `json:"imageUrl" db:"image_url"`
+type ProductRepo interface {
+	product.ProductRepository
 }
 
 type productRepository struct {
 	db *sqlx.DB
 }
 
-func NewProductRepository(db *sqlx.DB) ProductRepository {
+func NewProductRepository(db *sqlx.DB) ProductRepo {
 	return &productRepository{db: db}
 }
 
-func (r *productRepository) CreateProduct(product Product) (*Product, error) {
+func (r *productRepository) Create(product domain.Product) (*domain.Product, error) {
 	query := `
 		INSERT INTO products (title, description, price, image_url)
 		VALUES ($1, $2, $3, $4)
@@ -46,8 +37,8 @@ func (r *productRepository) CreateProduct(product Product) (*Product, error) {
 	return &product, err
 }
 
-func (r *productRepository) GetProduct(id int) (*Product, error) {
-	var product Product
+func (r *productRepository) Get(id int) (*domain.Product, error) {
+	var product domain.Product
 
 	query := `
 		SELECT id, title, description, price, image_url
@@ -67,8 +58,8 @@ func (r *productRepository) GetProduct(id int) (*Product, error) {
 	return &product, nil
 }
 
-func (r *productRepository) GetProducts() ([]*Product, error) {
-	var products []*Product
+func (r *productRepository) Gets() ([]*domain.Product, error) {
+	var products []*domain.Product
 
 	query := `
 		SELECT id, title, description, price, image_url
@@ -83,7 +74,7 @@ func (r *productRepository) GetProducts() ([]*Product, error) {
 	return products, nil
 }
 
-func (r *productRepository) UpdateProduct(id int, product Product) (*Product, error) {
+func (r *productRepository) Update(id int, product domain.Product) (*domain.Product, error) {
 	query := `
 		UPDATE products
 		SET title = $1, description = $2, price = $3, image_url = $4
@@ -99,7 +90,7 @@ func (r *productRepository) UpdateProduct(id int, product Product) (*Product, er
 	return &product, nil
 }
 
-func (r *productRepository) DeleteProduct(id int) error {
+func (r *productRepository) Delete(id int) error {
 	query := `
 		DELETE FROM products
 		WHERE id = $1
