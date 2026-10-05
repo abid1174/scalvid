@@ -205,7 +205,7 @@ product package                          order package
 Reorganize so each module is fully self-contained:
 
 ```
-backend/
+scalvid/
 ├── cmd/
 │   └── serve.go
 ├── config/

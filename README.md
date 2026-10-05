@@ -65,7 +65,7 @@ The application follows a **layered architecture** pattern with dependency injec
 ## 📁 Project Structure
 
 ```
-backend/
+scalvid/
 ├── cmd/                          # Application commands
 │   └── serve.go                  # Server initialization and wiring
 │
@@ -130,7 +130,7 @@ backend/
 
 ### Environment Variables
 
-Create a `.env` file in the backend directory:
+Create a `.env` file in the project root:
 
 ```env
 # Application
