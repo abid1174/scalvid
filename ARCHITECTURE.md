@@ -1,5 +1,7 @@
 # Scalvid Backend Architecture Plan
 
+> All paths in this document are relative to `backend/`.
+
 ## Current Architecture: Layered / Repository Pattern
 
 ```

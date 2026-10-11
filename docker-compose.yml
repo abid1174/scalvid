@@ -1,6 +1,6 @@
 services:
   scalvid-backend:
-    build: .
+    build: ./backend
     env_file:
       - .env
     ports:

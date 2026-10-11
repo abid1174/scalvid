@@ -66,58 +66,64 @@ The application follows a **layered architecture** pattern with dependency injec
 
 ```
 scalvid/
-├── cmd/                          # Application commands
-│   └── serve.go                  # Server initialization and wiring
-│
-├── config/                       # Configuration management
-│   └── config.go                 # Environment variable loading
-│
-├── database/                     # Database models and mock data
-│   ├── product.go                # Product model and mock operations
-│   ├── user.go                   # User model
-│   └── queries/                  # SQL migration scripts
-│       └── 001-products.sql      # Product table schema
-│
-├── infra/                        # Infrastructure components
-│   ├── db/
-│   │   └── connection.go         # PostgreSQL connection setup
-│   └── rabbitmq/                 # Message queue (future implementation)
-│
-├── repo/                         # Repository layer (data access)
-│   ├── product.go                # Product repository implementation
-│   └── user.go                   # User repository
-│
-├── rest/                         # REST API layer
-│   ├── server.go                 # HTTP server setup
-│   ├── handler/                  # Request handlers
-│   │   ├── product/
-│   │   │   ├── handler.go        # Product handler struct
-│   │   │   ├── router.go         # Product route registration
-│   │   │   ├── create_product.go # POST /products
-│   │   │   ├── get_product.go    # GET /products
-│   │   │   ├── get_product_by_id.go # GET /products/{id}
-│   │   │   ├── update_product.go # PUT /products/{id}
-│   │   │   └── delete_product.go # DELETE /products/{id}
-│   │   └── user/                 # User handlers (future)
+├── backend/                      # Go API (own go.mod + Dockerfile)
+│   ├── cmd/                          # Application commands
+│   │   └── serve.go                  # Server initialization and wiring
 │   │
-│   └── middleware/               # HTTP middleware
-│       ├── middleware.go         # Middleware struct
-│       ├── manage.go             # Middleware manager
-│       ├── authentication_jwt.go # JWT authentication
-│       ├── cors.go               # CORS handling
-│       ├── logger.go             # Request logging
-│       ├── preflight.go          # Preflight request handling
-│       └── test.go               # Test middleware
+│   ├── config/                       # Configuration management
+│   │   └── config.go                 # Environment variable loading
+│   │
+│   ├── database/                     # Database models and mock data
+│   │   ├── product.go                # Product model and mock operations
+│   │   ├── user.go                   # User model
+│   │   └── queries/                  # SQL migration scripts
+│   │       └── 001-products.sql      # Product table schema
+│   │
+│   ├── infra/                        # Infrastructure components
+│   │   ├── db/
+│   │   │   └── connection.go         # PostgreSQL connection setup
+│   │   └── rabbitmq/                 # Message queue (future implementation)
+│   │
+│   ├── repo/                         # Repository layer (data access)
+│   │   ├── product.go                # Product repository implementation
+│   │   └── user.go                   # User repository
+│   │
+│   ├── rest/                         # REST API layer
+│   │   ├── server.go                 # HTTP server setup
+│   │   ├── handler/                  # Request handlers
+│   │   │   ├── product/
+│   │   │   │   ├── handler.go        # Product handler struct
+│   │   │   │   ├── router.go         # Product route registration
+│   │   │   │   ├── create_product.go # POST /products
+│   │   │   │   ├── get_product.go    # GET /products
+│   │   │   │   ├── get_product_by_id.go # GET /products/{id}
+│   │   │   │   ├── update_product.go # PUT /products/{id}
+│   │   │   │   └── delete_product.go # DELETE /products/{id}
+│   │   │   └── user/                 # User handlers (future)
+│   │   │
+│   │   └── middleware/               # HTTP middleware
+│   │       ├── middleware.go         # Middleware struct
+│   │       ├── manage.go             # Middleware manager
+│   │       ├── authentication_jwt.go # JWT authentication
+│   │       ├── cors.go               # CORS handling
+│   │       ├── logger.go             # Request logging
+│   │       ├── preflight.go          # Preflight request handling
+│   │       └── test.go               # Test middleware
+│   │
+│   ├── utils/                        # Utility functions
+│   │   ├── jwt.go                    # JWT token generation
+│   │   └── response.go               # HTTP response helpers
+│   │
+│   ├── Dockerfile                    # Multi-stage Docker build
+│   ├── go.mod                        # Go module dependencies
+│   ├── go.sum                        # Dependency checksums
+│   └── main.go                       # Application entry point
 │
-├── utils/                        # Utility functions
-│   ├── jwt.go                    # JWT token generation
-│   └── response.go               # HTTP response helpers
+├── frontend/                     # Web client (to be added)
 │
-├── docker-compose.yml            # Docker services configuration
-├── Dockerfile                    # Multi-stage Docker build
-├── go.mod                        # Go module dependencies
-├── go.sum                        # Dependency checksums
-└── main.go                       # Application entry point
+├── docker-compose.yml            # Orchestrates backend + db (+ frontend)
+├── .env.example                  # Shared env vars (copy to .env)
+└── README.md
 ```
 
 ## 🚀 Getting Started
@@ -130,7 +136,7 @@ scalvid/
 
 ### Environment Variables
 
-Create a `.env` file in the project root:
+Create a `.env` file in the repo root (it is shared by docker-compose and the backend):
 
 ```env
 # Application
@@ -154,6 +160,7 @@ JWT_SECRET_KEY=your_secret_key_here
 1. **Install dependencies**:
 
    ```bash
+   cd backend
    go mod download
    ```
 
@@ -161,11 +168,12 @@ JWT_SECRET_KEY=your_secret_key_here
 
    - Install PostgreSQL locally
    - Create database: `createdb scalvid`
-   - Run migrations: `psql -d scalvid -f database/queries/001-products.sql`
+   - Run migrations: `psql -d scalvid -f backend/database/queries/001-products.sql`
 
 3. **Run the application**:
 
    ```bash
+   cd backend
    go run main.go
    ```
 
@@ -441,7 +449,7 @@ The `docker-compose.yml` orchestrates two services:
 
 **scalvid-backend**:
 
-- Builds from local Dockerfile
+- Builds from `backend/Dockerfile`
 - Depends on database (waits for health check)
 - Auto-restarts unless stopped
 - Maps port 8000

@@ -30,7 +30,10 @@ type Config struct {
 func loadConfig() {
 	// Load .env file if it exists (for local development)
 	// In Docker, environment variables are provided by docker-compose
+	// .env lives at the repo root (shared with docker-compose); also check cwd.
+	// godotenv never overrides variables that are already set.
 	_ = godotenv.Load()
+	_ = godotenv.Load("../.env")
 
 	// Get VERSION from .env file
 	version := os.Getenv("VERSION")
