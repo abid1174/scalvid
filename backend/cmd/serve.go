@@ -13,6 +13,8 @@ func Serve() {
 	config := config.GetConfig()
 
 	dbConnection := db.NewConnection(config.DB)
+	defer dbConnection.Close()
+
 	productRepository := repo.NewProductRepository(dbConnection)
 
 	middlewares := middleware.NewMiddlewares(config)

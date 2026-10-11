@@ -205,17 +205,20 @@ JWT_SECRET_KEY=your_secret_key_here
 
 ## 🔌 API Endpoints
 
-All endpoints require JWT authentication via `Authorization: Bearer <token>` header.
+Write endpoints require JWT authentication via the `Authorization: Bearer <token>` header. Reads are public.
 
 ### Products
 
-| Method | Endpoint         | Description          | Auth Required |
-| ------ | ---------------- | -------------------- | ------------- |
-| POST   | `/products`      | Create a new product | ✅            |
-| GET    | `/products`      | Get all products     | ✅            |
-| GET    | `/products/{id}` | Get product by ID    | ✅            |
-| PUT    | `/products/{id}` | Update a product     | ✅            |
-| DELETE | `/products/{id}` | Delete a product     | ✅            |
+| Method | Endpoint         | Description          | Auth Required | Success | Errors        |
+| ------ | ---------------- | -------------------- | ------------- | ------- | ------------- |
+| GET    | `/healthz`       | Liveness check       | ❌            | 200     |               |
+| POST   | `/products`      | Create a new product | ✅            | 201     | 400, 401      |
+| GET    | `/products`      | Get all products     | ❌            | 200     |               |
+| GET    | `/products/{id}` | Get product by ID    | ❌            | 200     | 400, 404      |
+| PUT    | `/products/{id}` | Update a product     | ✅            | 200     | 400, 401, 404 |
+| DELETE | `/products/{id}` | Delete a product     | ✅            | 204     | 400, 401, 404 |
+
+Errors are returned as `{"error": "<message>"}`. JSON request bodies are limited to 1 MB.
 
 ### Request/Response Examples
 
@@ -417,8 +420,9 @@ Tokens are validated in the `AuthenticationJWT` middleware:
 1. Extract token from `Authorization: Bearer <token>` header
 2. Split token into header, payload, and signature
 3. Regenerate signature using secret key
-4. Compare signatures (constant-time comparison recommended)
-5. If valid, allow request; otherwise, return 401 Unauthorized
+4. Compare signatures in constant time (`hmac.Equal`)
+5. Reject the token if its `exp` claim is missing or in the past
+6. If valid, allow request; otherwise, return 401 Unauthorized
 
 ### Security Features
 

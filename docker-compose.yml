@@ -23,6 +23,9 @@ services:
       - DB_NAME=${DB_NAME}
     restart: unless-stopped
     container_name: scalvid-backend
+    # Must exceed the server's 15s graceful shutdown timeout (rest/server.go),
+    # otherwise Docker SIGKILLs it before in-flight requests finish
+    stop_grace_period: 20s
     depends_on:
       scalvid-db:
         condition: service_healthy

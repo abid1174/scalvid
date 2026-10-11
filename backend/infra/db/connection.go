@@ -22,13 +22,12 @@ func GetConnectionString(dbConfig *config.DBConfig) string {
 
 func NewConnection(dbConfig *config.DBConfig) *sqlx.DB {
 	connectionString := GetConnectionString(dbConfig)
-	log.Println("Connection String: ", connectionString)
 
 	db, err := sqlx.Connect("postgres", connectionString)
-	log.Println("Database connected")
 	if err != nil {
 		log.Println("Error connecting to database")
 		log.Fatal(err)
 	}
+	log.Printf("Database connected (%s:%d/%s)", dbConfig.Host, dbConfig.Port, dbConfig.Name)
 	return db
 }

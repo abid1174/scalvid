@@ -7,10 +7,10 @@ import (
 
 func (h *Handler) RegisterRoute(mux *http.ServeMux, middlewareManager *middleware.Manager) {
 
-	// Product Routes
+	// Product Routes: reads are public, writes require a valid JWT
 	mux.Handle(
 		"POST /products",
-		middlewareManager.With(http.HandlerFunc(h.CreateProductHandler)),
+		middlewareManager.With(http.HandlerFunc(h.CreateProductHandler), h.middlewares.AuthenticationJWT),
 	)
 
 	mux.Handle(
@@ -25,11 +25,11 @@ func (h *Handler) RegisterRoute(mux *http.ServeMux, middlewareManager *middlewar
 
 	mux.Handle(
 		"PUT /products/{id}",
-		middlewareManager.With(http.HandlerFunc(h.UpdateProductHandler)),
+		middlewareManager.With(http.HandlerFunc(h.UpdateProductHandler), h.middlewares.AuthenticationJWT),
 	)
 
 	mux.Handle(
 		"DELETE /products/{id}",
-		middlewareManager.With(http.HandlerFunc(h.DeleteProductHandler)),
+		middlewareManager.With(http.HandlerFunc(h.DeleteProductHandler), h.middlewares.AuthenticationJWT),
 	)
 }

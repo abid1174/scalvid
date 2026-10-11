@@ -1,7 +1,9 @@
 package product
 
 import (
+	"errors"
 	"net/http"
+	"scalvid/repo"
 	"scalvid/utils"
 	"strconv"
 )
@@ -14,7 +16,11 @@ func (h *Handler) GetProductByIdHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	product, err := h.productRepo.GetProduct(id)
+	product, err := h.productRepo.GetProduct(r.Context(), id)
+	if errors.Is(err, repo.ErrNotFound) {
+		utils.SendError(w, http.StatusNotFound, "Product not found")
+		return
+	}
 	if err != nil {
 		utils.SendError(w, http.StatusInternalServerError, "Failed to get product")
 		return

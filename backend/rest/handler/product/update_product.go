@@ -1,7 +1,7 @@
 package product
 
 import (
-	"encoding/json"
+	"errors"
 	"net/http"
 	"scalvid/repo"
 	"scalvid/utils"
@@ -17,13 +17,22 @@ func (h *Handler) UpdateProductHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var product repo.Product
-	err = json.NewDecoder(r.Body).Decode(&product)
+	err = utils.DecodeJSON(w, r, &product)
 	if err != nil {
 		utils.SendError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
-	updatedProduct, err := h.productRepo.UpdateProduct(id, product)
+	if err := validateProduct(product); err != nil {
+		utils.SendError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	updatedProduct, err := h.productRepo.UpdateProduct(r.Context(), id, product)
+	if errors.Is(err, repo.ErrNotFound) {
+		utils.SendError(w, http.StatusNotFound, "Product not found")
+		return
+	}
 	if err != nil {
 		utils.SendError(w, http.StatusInternalServerError, "Failed to update product")
 		return

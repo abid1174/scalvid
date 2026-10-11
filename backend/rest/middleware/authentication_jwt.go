@@ -4,35 +4,30 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"net/http"
+	"scalvid/utils"
 	"strings"
+	"time"
 )
 
 func (m *Middlewares) AuthenticationJWT(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		// extract jwt token from request header
+		// extract jwt token from "Authorization: Bearer <token>" header
 		authHeader := r.Header.Get("Authorization")
 
-		if authHeader == "" {
-			http.Error(w, "Unauthorised", http.StatusUnauthorized)
+		scheme, accessToken, found := strings.Cut(authHeader, " ")
+		if !found || !strings.EqualFold(scheme, "Bearer") || accessToken == "" {
+			utils.SendError(w, http.StatusUnauthorized, "Unauthorised")
 			return
 		}
-
-		authHeaderArr := strings.Split(authHeader, " ")
-
-		if len(authHeaderArr) != 2 {
-			http.Error(w, "Unauthorised", http.StatusUnauthorized)
-			return
-		}
-
-		accessToken := authHeaderArr[1]
 
 		// parse accesstoken
 		tokenParts := strings.Split(accessToken, ".")
 
 		if len(tokenParts) != 3 {
-			http.Error(w, "Unauthorised", http.StatusUnauthorized)
+			utils.SendError(w, http.StatusUnauthorized, "Unauthorised")
 			return
 		}
 
@@ -44,17 +39,31 @@ func (m *Middlewares) AuthenticationJWT(next http.Handler) http.Handler {
 		tokenHeaderAndPayload := tokenHeader + "." + tokenPayload
 		jwtSecret := m.config.JwtSecretKey
 
-		byteArrTokenHeaderAndPayload := []byte(tokenHeaderAndPayload)
-		byteArrJwtSecret := []byte(jwtSecret)
+		h := hmac.New(sha256.New, []byte(jwtSecret))
+		h.Write([]byte(tokenHeaderAndPayload))
+		newSignature := base64Encode(h.Sum(nil))
 
-		h := hmac.New(sha256.New, byteArrJwtSecret)
-		h.Write(byteArrTokenHeaderAndPayload)
-		hash := h.Sum(nil)
-		newSignature := base64Encode(hash)
+		// check token signature with newly created signature in constant time
+		if !hmac.Equal([]byte(tokenSignature), []byte(newSignature)) {
+			utils.SendError(w, http.StatusUnauthorized, "Unauthorised")
+			return
+		}
 
-		// check token signature with newly created signature
-		if tokenSignature != newSignature {
-			http.Error(w, "Unauthorised", http.StatusUnauthorized)
+		// reject expired tokens
+		payloadJSON, err := base64.RawURLEncoding.DecodeString(tokenPayload)
+		if err != nil {
+			utils.SendError(w, http.StatusUnauthorized, "Unauthorised")
+			return
+		}
+
+		var payload utils.Payload
+		if err := json.Unmarshal(payloadJSON, &payload); err != nil {
+			utils.SendError(w, http.StatusUnauthorized, "Unauthorised")
+			return
+		}
+
+		if payload.Exp == 0 || time.Now().Unix() >= payload.Exp {
+			utils.SendError(w, http.StatusUnauthorized, "Token expired")
 			return
 		}
 

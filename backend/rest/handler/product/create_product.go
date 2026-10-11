@@ -1,45 +1,31 @@
 package product
 
 import (
-	"encoding/json"
-	"log"
 	"net/http"
 	"scalvid/repo"
 	"scalvid/utils"
 )
 
 func (h *Handler) CreateProductHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("CreateProductHandler")
-
 	var product repo.Product
 
-	log.Println("Request Body", r.Body)
-
-	err := json.NewDecoder(r.Body).Decode(&product)
+	err := utils.DecodeJSON(w, r, &product)
 	if err != nil {
 		utils.SendError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
-	if product.Title == "" {
-		utils.SendError(w, http.StatusBadRequest, "Title is required")
+	if err := validateProduct(product); err != nil {
+		utils.SendError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	if product.Price <= 0 {
-		utils.SendError(w, http.StatusBadRequest, "Price must be greater than 0")
-		return
-	}
-
-	createdProduct, err := h.productRepo.CreateProduct(repo.Product{
+	createdProduct, err := h.productRepo.CreateProduct(r.Context(), repo.Product{
 		Title:       product.Title,
 		Price:       product.Price,
 		Description: product.Description,
 		ImageUrl:    product.ImageUrl,
 	})
-
-	log.Println(createdProduct)
-
 	if err != nil {
 		utils.SendError(w, http.StatusInternalServerError, "Failed to create product")
 		return
